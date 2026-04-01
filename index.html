@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cash Calculator</title>
+
+  <!-- PWA Meta -->
+  <meta name="theme-color" content="#6366f1"/>
+  <link rel="manifest" href="manifest.json">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    .fade-in { animation: fadeIn 0.4s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px);} to { opacity: 1; transform: translateY(0);} }
+    .pulse { animation: pulse 0.4s ease; }
+    @keyframes pulse { 0% { transform: scale(1);} 50% { transform: scale(1.08);} 100% { transform: scale(1);} }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 min-h-screen flex items-center justify-center p-4">
+
+  <div class="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl w-full max-w-md p-6 fade-in">
+    
+    <h1 class="text-2xl font-bold text-center mb-1">💰 Cash Calculator</h1>
+    <p class="text-center text-gray-500 text-sm mb-4">Install this app on your phone</p>
+
+    <button id="installBtn" class="hidden mb-3 w-full bg-indigo-500 text-white py-2 rounded-xl">Install App</button>
+
+    <div class="space-y-3">
+      <div class="flex justify-between items-center"><label>₹10</label><input type="number" id="n10" class="input" oninput="calculate()"></div>
+      <div class="flex justify-between items-center"><label>₹20</label><input type="number" id="n20" class="input" oninput="calculate()"></div>
+      <div class="flex justify-between items-center"><label>₹50</label><input type="number" id="n50" class="input" oninput="calculate()"></div>
+      <div class="flex justify-between items-center"><label>₹100</label><input type="number" id="n100" class="input" oninput="calculate()"></div>
+      <div class="flex justify-between items-center"><label>₹200</label><input type="number" id="n200" class="input" oninput="calculate()"></div>
+      <div class="flex justify-between items-center"><label>₹500</label><input type="number" id="n500" class="input" oninput="calculate()"></div>
+    </div>
+
+    <div class="mt-6 text-center">
+      <p class="text-gray-500">Total Amount</p>
+      <p id="total" class="text-4xl font-bold text-indigo-600">₹0</p>
+    </div>
+
+    <div class="mt-5 flex gap-3">
+      <button onclick="resetAll()" class="w-full bg-red-500 text-white py-2 rounded-xl">Reset</button>
+    </div>
+
+  </div>
+
+  <style>
+    .input {
+      width: 100px;
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    .input:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 2px rgba(99,102,241,0.2);
+      transform: scale(1.05);
+    }
+  </style>
+
+  <script>
+    function calculate() {
+      const ids = ['n10','n20','n50','n100','n200','n500'];
+      const values = ids.map(id => parseInt(document.getElementById(id).value) || 0);
+      const total = (values[0]*10)+(values[1]*20)+(values[2]*50)+(values[3]*100)+(values[4]*200)+(values[5]*500);
+      const totalEl = document.getElementById('total');
+      totalEl.innerText = '₹' + total.toLocaleString();
+      totalEl.classList.remove('pulse'); void totalEl.offsetWidth; totalEl.classList.add('pulse');
+    }
+
+    function resetAll() {
+      ['n10','n20','n50','n100','n200','n500'].forEach(id => document.getElementById(id).value='');
+      calculate();
+    }
+
+    // PWA install
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.classList.remove('hidden');
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        installBtn.classList.add('hidden');
+      }
+    });
+
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+
+</body>
+</html>
